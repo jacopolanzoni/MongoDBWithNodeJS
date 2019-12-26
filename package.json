@@ -1,7 +1,11 @@
 {
   "name": "mongodbwithnodejs",
   "version": "1.0.0",
-  "description": "",
+  "description": "Using MongoDB with Node.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jacopolanzoni/MongoDBWithNodeJS"
+  },
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

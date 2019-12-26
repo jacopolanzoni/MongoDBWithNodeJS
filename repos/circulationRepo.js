@@ -21,6 +21,69 @@ function circulationRepo() {
     });
   }
 
+  function averageFinalists() {
+    return new Promise(async (resolve, reject) => {
+      const client = new MongoClient(url, { useUnifiedTopology: true });
+      try {
+        await client.connect();
+        const db = client.db(dbName);
+        const average = await db.collection('newspapers').aggregate([{
+          $group: {
+            _id: null,
+            avgFinalists: {
+              $avg: "$Pulitzer Prize Winners and Finalists, 1990-2014"
+            } 
+          }
+        }]).toArray();
+        resolve(average[0].avgFinalists);
+      } catch(error) {
+        reject(error);
+      } finally {
+        client.close();  
+      }
+    });
+  }
+
+  function averageFinalistsByChange() {
+    return new Promise(async (resolve, reject) => {
+      const client = new MongoClient(url, { useUnifiedTopology: true });
+      try {
+        await client.connect();
+        const db = client.db(dbName);
+        const average = await db.collection('newspapers').aggregate([
+          {
+            $project: {
+              "Newspaper": 1,
+              "Pulitzer Prize Winners and Finalists, 1990-2014": 1,
+              "Change in Daily Circulation, 2004-2013": 1,
+              overallChange: {
+                $cond: {
+                  if: {
+                    $gte: ["$Change in Daily Circulation, 2004-2013", 0]
+                  },
+                  then: "positive",
+                  else: "negative"
+                }
+              } 
+            }
+          }, {
+            $group: {
+              _id: "$overallChange",
+              avgFinalists: {
+                $avg: "$Pulitzer Prize Winners and Finalists, 1990-2014"
+              } 
+            }
+          }
+        ]).toArray();
+        resolve(average);
+      } catch(error) {
+        reject(error);
+      } finally {
+        client.close();  
+      }
+    });
+  }
+
   function get(query, limit) {
     return new Promise(async (resolve, reject) => {
       const client = new MongoClient(url, { useUnifiedTopology: true });
@@ -107,7 +170,7 @@ function circulationRepo() {
     });
   }
 
-  return { add, get, getById, loadData, remove, update }
+  return { add, averageFinalists, averageFinalistsByChange, get, getById, loadData, remove, update }
 
 }
 

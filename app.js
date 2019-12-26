@@ -69,6 +69,10 @@ async function main(){
     assert(removed);
     assert.equal(await circulationRepo.getById(addedItem._id), null);
 
+    console.log(await circulationRepo.averageFinalists());
+
+    console.log(await circulationRepo.averageFinalistsByChange());
+
   } catch (error) {
     console.log(error);
   } finally {
